@@ -2,11 +2,18 @@
   <div class="table">
     <div class="container">
       <Modal
-        :title="Enums.txtEditAsset"
+        :title="title"
         v-if="isShowModal"
         :toggleModal="toggleModal"
-        :type="TypeConfirm.editForm"
+        :type="
+          title === Enums.txtEditAsset
+            ? TypeConfirm.editForm
+            : TypeConfirm.cloningForm
+        "
+        :dataAsset="dataAsset"
       />
+
+      <LoadingScreen v-if="loading === true" />
 
       <table class="m-table du-lieu">
         <thead>
@@ -33,35 +40,52 @@
               STT
             </th>
 
-            <th class="text-align-left" style="width: 160px">
+            <th class="text-align-left" style="width: 120px">
               {{ Enums.txtAssetCode }}
             </th>
-            <th class="text-align-left" style="width: 200px">
+            <th class="text-align-left">
               {{ Enums.txtAssetName }}
             </th>
-            <th class="text-align-left" style="width: 230px">
+            <th
+              class="text-align-left"
+              style="width: 300px; max-width: 300px; min-width: 300px"
+            >
               {{ Enums.txtAssetType }}
             </th>
-            <th class="text-align-left">{{ Enums.txtDepartment }}</th>
-            <th class="text-align-right" style="width: 100px">
+            <th
+              class="text-align-left"
+              style="width: 204px; max-width: 204px; min-width: 204px"
+            >
+              {{ Enums.txtDepartment }}
+            </th>
+            <th
+              class="text-align-right"
+              style="width: 100px; max-width: 100px; min-width: 100px"
+            >
               {{ Enums.txtQuantity }}
             </th>
-            <th class="text-align-right" style="width: 150px">
+            <th
+              class="text-align-right"
+              style="width: 150px; max-width: 150px; min-width: 150px"
+            >
               {{ Enums.txtPrice }}
             </th>
             <th
               class="text-align-right"
-              style="width: 150px"
+              style="width: 150px; max-width: 150px; min-width: 150px"
               title="Hao mòn/ Khấu hao"
             >
               {{ Enums.txtHmKh }}
             </th>
-            <th class="text-align-right" style="width: 150px">
+            <th
+              class="text-align-right"
+              style="width: 150px; max-width: 150px; min-width: 150px"
+            >
               {{ Enums.txtRemainValue }}
             </th>
             <th
               class="text-align-center"
-              style="width: 100px; border-radius: 0 3.5px 0 0"
+              style="width: 100px; border-radius: 0 3.5px 0 0 max-width: 100px; min-width: 100px"
             >
               {{ Enums.txtFunction }}
             </th>
@@ -70,9 +94,21 @@
       </table>
 
       <div class="my-table">
-        <table class="m-table du-lieu">
+        <table class="m-table du-lieu" v-if="listAsset.length > 0">
           <tbody>
-            <tr class="item" v-for="(item, i) in ASSETS" :key="item.id">
+            <tr
+              class="item"
+              v-for="(item, i) in listAsset"
+              :key="item.id"
+              :style="{
+                backgroundColor: selected.some(
+                  (select) => select.fixed_asset_id === item.fixed_asset_id
+                )
+                  ? 'rgba(26, 164, 200, 0.2)'
+                  : '#fff',
+              }"
+              v-on:dblclick="() => toggleModal(item, Enums.txtEditAsset)"
+            >
               <td class="text-align-center">
                 <div class="check">
                   <input
@@ -90,45 +126,117 @@
                 class="text-align-left"
                 style="width: 25px; padding-left: 0px; padding-right: 20px"
               >
-                {{ i + 1 }}
+                <label class="labelBox" :for="`check${i}`">
+                  {{ i + pageSize * (currentPage - 1) + 1 }}
+                </label>
               </td>
-              <td class="text-align-left" style="width: 160px">
-                {{ item.assetCode }}
+              <td class="text-align-left" style="width: 120px">
+                <label :for="`check${i}`">
+                  <div class="labelBox">
+                    {{ item.fixed_asset_code }}
+                  </div>
+                </label>
               </td>
-              <td class="text-align-left" style="width: 200px">
-                {{ item.assetName }}
+              <td class="text-align-left">
+                <label :for="`check${i}`">
+                  <div class="labelBox">
+                    {{ item.fixed_asset_name }}
+                  </div>
+                </label>
               </td>
-              <td class="text-align-left" style="width: 230px">
-                {{ item.assetType }}
+              <td
+                class="text-align-left"
+                style="width: 300px; max-width: 300px; min-width: 300px"
+              >
+                <label :for="`check${i}`">
+                  <div class="labelBox">
+                    {{ item.fixed_asset_category_name }}
+                  </div>
+                </label>
               </td>
-              <td class="text-align-left">{{ item.department }}</td>
-              <td class="text-align-right" style="width: 100px">
-                {{ item.quantity }}
+              <td
+                class="text-align-left department"
+                style="width: 200px; max-width: 200px; min-width: 200px"
+              >
+                <label :for="`check${i}`">
+                  <div class="labelBox">
+                    {{ item.department_name }}
+                  </div>
+                </label>
               </td>
-              <td class="text-align-right" style="width: 150px">
-                {{ vueNumberFormat(item.price, {}) }}
+              <td
+                class="text-align-right"
+                style="width: 100px; max-width: 100px; min-width: 100px"
+              >
+                <label :for="`check${i}`">
+                  <div class="labelBox justify-end">
+                    {{ item.quantity }}
+                  </div>
+                </label>
               </td>
-              <td class="text-align-right" style="width: 150px">
-                {{ vueNumberFormat(item.mh_kh, {}) }}
+              <td
+                class="text-align-right"
+                style="width: 150px; max-width: 150px; min-width: 150px"
+              >
+                <label :for="`check${i}`">
+                  <div class="labelBox justify-end">
+                    {{ vueNumberFormat(item.cost, {}) }}
+                  </div>
+                </label>
               </td>
-              <td class="text-align-right" style="width: 150px">
-                {{ vueNumberFormat(item.remainValue, {}) }}
+              <td
+                class="text-align-right"
+                style="width: 150px; max-width: 150px; min-width: 150px"
+              >
+                <label :for="`check${i}`">
+                  <div class="labelBox justify-end">
+                    {{
+                      vueNumberFormat(
+                        calAccumulated(item.cost, item.depreciation_rate),
+                        {}
+                      )
+                    }}
+                  </div>
+                </label>
               </td>
-              <td class="text-align-center" style="width: 100px">
+              <td
+                class="text-align-right"
+                style="width: 150px; max-width: 150px; min-width: 150px"
+              >
+                <label :for="`check${i}`">
+                  <div class="labelBox justify-end">
+                    {{
+                      vueNumberFormat(
+                        remainValue(item.cost, item.depreciation_rate),
+                        {}
+                      )
+                    }}
+                  </div>
+                </label>
+              </td>
+              <td
+                class="text-align-center"
+                style="width: 100px; max-width: 100px; min-width: 100px"
+              >
                 <button
                   class="btn btn-edit"
                   :title="Enums.txtEditAsset"
-                  @click="toggleModal"
+                  @click="() => toggleModal(item, Enums.txtEditAsset)"
                 ></button>
                 <button
                   class="btn btn-other"
-                  :title="Enums.txtAssetCloning"
+                  :title="Enums.txtCloningAsset"
+                  @click="() => toggleModal(item, Enums.txtCloningAsset)"
                 ></button>
               </td>
             </tr>
-            <tr style="width: '37px'"></tr>
+            <tr style="height: '37px'"></tr>
           </tbody>
         </table>
+
+        <div v-else class="no-data">
+          <div class="no-data-icon"></div>
+        </div>
       </div>
 
       <table class="bang-thong-ke m-table">
@@ -136,7 +244,9 @@
           <tr class="hang-thong-ke">
             <th>
               <div class="thong-ke">
-                <p>Tổng số: <b>200</b> bản ghi</p>
+                <p>
+                  Tổng số: <b>{{ totalAsset }}</b> bản ghi
+                </p>
                 <div
                   class="selector"
                   @click="toggle()"
@@ -149,17 +259,17 @@
                   "
                 >
                   <div class="label_value">
-                    <span>{{ value }}</span>
+                    <span>{{ pageSize }}</span>
                   </div>
 
                   <div class="arrow"></div>
 
                   <ul class="items" v-if="visible">
                     <li
-                      :class="{ current: item === value }"
+                      :class="{ current: item === pageSize }"
                       v-for="(item, i) in numDoc"
                       :key="i"
-                      @click="select(item)"
+                      @click="handleSizeChange(item)"
                       class="item_num"
                     >
                       <div class="checkNum"></div>
@@ -170,26 +280,20 @@
                   </ul>
                 </div>
 
-                <div class="m-paging">
-                  <button>
-                    <div class="m-btn-prev"></div>
-                  </button>
-                  <div class="m-page-number-group">
-                    <button class="m-page-number m-page-number-selected">
-                      1
-                    </button>
-                    <button class="m-page-number">2</button>
-                    <button class="m-page-number">3</button>
-                    <button class="m-page-number">4</button>
-                  </div>
-                  <button>
-                    <div class="m-btn-next"></div>
-                  </button>
-                </div>
+                <el-pagination
+                  v-model:currentPage="currentPage"
+                  :page-size="pageSize"
+                  layout="prev, pager, next"
+                  :total="totalAsset"
+                  :disabled="false"
+                  @current-change="handleCurrentChange"
+                />
               </div>
             </th>
 
-            <th class="text-align-right">{{ ASSETS.length }}</th>
+            <th class="text-align-right">
+              {{ vueNumberFormat(totalQuantity, {}) }}
+            </th>
             <th class="text-align-right" style="width: 150px">
               {{ vueNumberFormat(totalPrice, {}) }}
             </th>
@@ -199,7 +303,10 @@
             <th class="text-align-right" style="width: 150px">
               {{ vueNumberFormat(totalRemainValue, {}) }}
             </th>
-            <th class="text-align-center" style="width: 100px"></th>
+            <th
+              class="text-align-center"
+              style="width: 100px; max-width: 100px; min-width: 100px"
+            ></th>
           </tr>
         </thead>
       </table>
@@ -211,26 +318,40 @@ import { ASSETS } from "../data";
 import BaseModal from "../layout/BaseModal.vue";
 import { Enums } from "@/assets/Constants";
 import { TypeConfirm } from "@/assets/Constants";
+import axios from "axios";
+import LoadingScreen from "./LoadingScreen.vue";
+import { openToast } from "../state";
 
 export default {
   data() {
     return {
+      dataAsset: {},
       numDoc: [20, 50, 100],
       selected: [],
       isSelectAll: false,
       isShowModal: false,
       itemEditing: {},
       text: String,
-      totalPrice: this.calTotalPrice(),
-      totalAccumulated: this.calAccumulated(),
-      totalRemainValue: this.calTotalRemainValue(),
+      totalPrice: 0,
+      totalAccumulated: 0,
+      totalRemainValue: 0,
+      totalQuantity: 0,
       visible: false,
-      value: 20,
+      totalAsset: 0,
+      currentPage: 1,
+      pageSize: 20,
+      listAsset: [],
+      loading: false,
+      departmentId: "",
+      categoryId: "",
+      keyword: "",
+      title: "",
     };
   },
 
   components: {
     Modal: BaseModal,
+    LoadingScreen,
   },
 
   methods: {
@@ -238,16 +359,8 @@ export default {
      * Ẩn hiện select số bản ghi được liệt kê
      * Author : VMDANG (17/10/2022)
      */
-
     toggle() {
       this.visible = !this.visible;
-    },
-    /**
-     * Chọn số bản ghi được liệt kê
-     * Author : VMDANG (17/10/2022)
-     */
-    select(option) {
-      this.value = option;
     },
 
     /**
@@ -259,8 +372,8 @@ export default {
     onSelectAll() {
       this.selected = [];
       if (!this.isSelectAll) {
-        for (let i in ASSETS) {
-          this.selected.push(this.ASSETS[i]);
+        for (let i in this.listAsset) {
+          this.selected.push(this.listAsset[i]);
         }
       }
     },
@@ -269,8 +382,10 @@ export default {
      * Ẩn hiện Modal Sửa thông tin tài sản
      * Author : VMDANG (18/10/2022)
      */
-    toggleModal() {
+    toggleModal(dataAsset, title) {
       this.isShowModal = !this.isShowModal;
+      this.dataAsset = dataAsset;
+      this.title = title;
     },
 
     /**
@@ -278,7 +393,7 @@ export default {
      * Author : VMDANG (17/10/2022)
      */
     onSelect() {
-      if (this.selected.length === ASSETS.length) {
+      if (this.selected.length === this.listAsset.length) {
         this.isSelectAll = true;
       } else {
         this.isSelectAll = false;
@@ -289,33 +404,38 @@ export default {
      * Chọn các tài sản thực hiện xóa
      * Author : VMDANG (17/10/2022)
      */
-
     onChange() {
       this.$emit("listData", this.selected);
     },
 
     /**
-     * Tổng nguyên giá của bảng
+     * Tính lũy kế của hàng
      * Author : VMDANG (17/10/2022)
      */
-    calTotalPrice() {
-      let cal = 0;
-      ASSETS.forEach((item) => {
-        cal += item.price;
-      });
-      return cal;
+    calAccumulated(cost, rate) {
+      return (cost * rate) / 100;
     },
 
     /**
      * Tổng lũy kế của bảng
      * Author : VMDANG (17/10/2022)
      */
-    calAccumulated() {
-      let cal = 0;
-      ASSETS.forEach((item) => {
-        cal += item.mh_kh;
+    calTotalAccumulated() {
+      this.totalAccumulated = 0;
+      this.listAsset?.forEach((item) => {
+        this.totalAccumulated += this.calAccumulated(
+          item.cost,
+          item.depreciation_rate
+        );
       });
-      return cal;
+    },
+
+    /**
+     * Tính còn lại của hàng
+     * Author : VMDANG (17/10/2022)
+     */
+    remainValue(cost, rate) {
+      return cost - (cost * rate) / 100;
     },
 
     /**
@@ -323,20 +443,180 @@ export default {
      * Author : VMDANG (17/10/2022)
      */
     calTotalRemainValue() {
-      let cal = 0;
-      ASSETS.forEach((item) => {
-        cal += item.remainValue;
+      this.totalRemainValue = this.totalPrice - this.totalAccumulated;
+    },
+
+    /**
+     * Tổng giá Số lượng và giá của bảng
+     * Author : VMDANG (17/10/2022)
+     */
+    calTotalCostAndQuantity() {
+      this.totalPrice = 0;
+      this.totalQuantity = 0;
+      this.listAsset?.forEach((item) => {
+        this.totalPrice += item?.cost;
+        this.totalQuantity += item?.quantity;
       });
-      return cal;
+    },
+
+    /**
+     * Thay đổi pageSize
+     * @param val : Size thay đổi
+     * Author : VMDANG (10/11/2022)
+     */
+    handleSizeChange(val) {
+      this.currentPage = 1;
+      this.pageSize = val;
+      this.getListAsset();
+    },
+
+    /**
+     * Thay đổi trang hiện tại
+     * @param val :  Page thay đổi
+     * Author : VMDANG (10/11/2022)
+     */
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.getListAsset();
+    },
+
+    /**
+     * Lấy danh sách tài sản
+     * Author : VMDANG (10/11/2022)
+     */
+    getListAsset() {
+      this.loading = true;
+      axios
+        .get(
+          `http://localhost:5137/api/FixedAsset/filter?pageSize=${this.pageSize}&pageIndex=${this.currentPage}&keyword=${this.keyword}&departmentId=${this.departmentId}&categoryId=${this.categoryId}`
+        )
+        .then((response) => {
+          this.listAsset = response?.data?.fixedAssets;
+          this.loading = false;
+        })
+        .catch((e) => {
+          console.log(e);
+          this.loading = false;
+        });
+    },
+
+    /**
+     * Lấy tổng số tài sản
+     * Author : VMDANG (10/11/2022)
+     */
+    getTotalAsset() {
+      this.loading = true;
+      axios
+        .get(
+          `http://localhost:5137/api/FixedAsset/total?keyword=${this.keyword}&departmentId=${this.departmentId}&categoryId=${this.categoryId}`
+        )
+        .then((response) => {
+          this.totalAsset = response?.data?.totalAsset;
+          this.loading = false;
+        })
+        .catch((e) => {
+          console.log(e);
+          this.loading = false;
+        });
     },
   },
 
   setup() {
-    return { ASSETS, Enums, TypeConfirm };
+    return { ASSETS, Enums, TypeConfirm, openToast };
+  },
+
+  created() {},
+
+  mounted() {
+    this.getListAsset();
+    this.getTotalAsset();
+    this.emitter.on("changeAsset", () => {
+      this.loading = true;
+      this.getListAsset();
+      this.getTotalAsset();
+      this.selected = [];
+      this.onChange();
+    });
+
+    this.emitter.on("deleteAsset", (assetDeletes) => {
+      assetDeletes?.length === 1
+        ? axios
+            .delete(`http://localhost:5137/api/FixedAsset/${assetDeletes[0]}`)
+            .then(() => {
+              this.getListAsset();
+              this.getTotalAsset();
+              this.selected = [];
+              this.onChange();
+              openToast();
+              this.emitter.emit("deleteSuccess");
+            })
+            .catch((e) => {
+              console.log(e);
+            })
+        : axios
+            .delete(`http://localhost:5137/api/FixedAsset/multiple`, {
+              data: assetDeletes,
+            })
+            .then(() => {
+              this.getListAsset();
+              this.getTotalAsset();
+              this.selected = [];
+              this.onChange();
+              openToast();
+              this.emitter.emit("deleteSuccess");
+            })
+            .catch((e) => {
+              console.log(e);
+            });
+    });
+    this.emitter.on("changeSearchKeyword", (payload) => {
+      this.keyword = payload;
+      this.getListAsset();
+      this.getTotalAsset();
+    });
+    this.emitter.on("changeDepartment", (payload) => {
+      this.departmentId = payload;
+      this.getListAsset();
+      this.getTotalAsset();
+    });
+    this.emitter.on("changeCategory", (payload) => {
+      this.categoryId = payload;
+      this.getListAsset();
+      this.getTotalAsset();
+    });
+  },
+  beforeUpdate() {
+    this.calTotalCostAndQuantity();
+    this.calTotalAccumulated();
+    this.calTotalRemainValue();
   },
 };
 </script>
+
 <style lang="css" scoped>
+.no-data {
+  width: 100%;
+  height: calc(100vh - 174px);
+}
+.no-data-icon {
+  width: 100%;
+  height: 100%;
+  background-image: url("../assets/img-EmptyData-L.svg");
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+.department {
+  width: calc(100% - 1352px);
+}
+.justify-end {
+  justify-content: end;
+}
+.labelBox {
+  width: 100%;
+  height: 37px;
+  display: flex;
+  align-items: center;
+}
 .item_num.current .checkNum {
   left: 9px;
   top: 4px;
@@ -369,7 +649,7 @@ export default {
   display: flex;
   align-items: center;
   position: relative;
-  background-color: #ffffff;
+  background-color: #f9fafc;
   border-radius: 2.625px;
   border: 1px solid #afafaf;
   width: 59px;
@@ -450,7 +730,7 @@ export default {
   border-radius: 0 0 3.5px 3.5px;
 }
 td {
-  border-bottom: 1px solid #e1e1e1;
+  border-bottom: 1px solid #f1f1f1;
 }
 .check-box {
   margin: 0;
@@ -511,7 +791,7 @@ td {
   text-align: center;
 }
 
-.m-table tbody tr:hover {
+.m-table tbody label tr:hover {
   background-color: #e9ebee;
   cursor: pointer;
 }
@@ -521,6 +801,9 @@ td {
 }
 
 .item:hover {
+  background-color: rgba(26, 164, 200, 0.2) !important;
+}
+.item:focus {
   background-color: rgba(26, 164, 200, 0.2) !important;
 }
 
@@ -599,18 +882,20 @@ p {
   overflow: hidden;
   cursor: pointer;
   border: none;
-  margin: 0 8px;
+
   display: none;
 }
 .btn-edit {
   background: url("../assets/qlts-icon.svg") no-repeat -156px -68px;
   width: 16px;
   height: 16px;
+  margin-right: 8px;
 }
 .btn-other {
   background: url("../assets/qlts-icon.svg") no-repeat -244px -112px;
   width: 16px;
   height: 16px;
+  margin-left: 8px;
 }
 
 input[type="checkbox"] {
@@ -646,11 +931,9 @@ input[type="checkbox"] {
   position: absolute;
   display: none;
 }
-/* Show the checkmark when checked */
 .check input:checked ~ .checkmark:after {
   display: block;
 }
-/* Style the checkmark/indicator */
 .check .checkmark:after {
   left: 5px;
   top: 1px;
@@ -661,5 +944,22 @@ input[type="checkbox"] {
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
+}
+</style>
+
+<style lang="css">
+.el-pager li.is-active {
+  font-weight: 700;
+  color: black;
+  background-color: #ede3e3;
+  border-radius: 3px;
+}
+ul > li.number {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  font-size: 13px;
+  min-width: 0;
+  margin-right: 7px;
 }
 </style>

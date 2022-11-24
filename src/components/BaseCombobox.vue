@@ -1,11 +1,10 @@
 <template lang="">
   <div class="aselect" :data-value="value" :data-list="list">
     <div class="title" v-if="title">
-      <p>
-        {{ title }}
-      </p>
-      <p style="color: red">*</p>
+      <p>{{ title }}</p>
+      <p style="color: red; margin-left: 2px">*</p>
     </div>
+
     <div
       class="selector"
       @click="toggle()"
@@ -32,6 +31,17 @@
         }"
       >
         <span>{{ tempInput }}</span>
+        <!-- <input
+          v-model="tempInput"
+          type="text"
+          @input="onChange"
+          class="input"
+        /> -->
+        <!-- @blur="
+            () => {
+              if (tempInput === '') tempInput = option_default;
+            }
+          " -->
       </div>
       <div class="error-message" v-show="error">{{ error }}</div>
 
@@ -57,21 +67,29 @@
           top: hasCheck && '34px',
           width: !hasCheck && '170%',
         }"
-        ref="firstFocus"
       >
         <li
-          :class="{ current: item === tempInput }"
           v-for="(item, i) in options"
+          :class="{
+            current:
+              item?.department_code === tempInput ||
+              item?.fixed_asset_category_code === tempInput,
+          }"
           :key="i"
           @click="select(item)"
           class="item"
         >
-          <div class="item_ma" :style="{ width: hasCheck ? '34px' : '60px' }">
+          <div
+            class="item_ma"
+            :style="{ width: hasCheck ? '34px' : '60px', minWidth: '34px' }"
+          >
             <div v-if="hasCheck" class="checkmark"></div>
-            <span v-else>{{ item }}</span>
+            <span v-else>{{
+              item?.department_code || item?.fixed_asset_category_code
+            }}</span>
           </div>
-          <span>
-            {{ DEPARTMENT_NAME[i] }}
+          <span class="item_name">
+            {{ item?.department_name || item?.fixed_asset_category_name }}
           </span>
         </li>
       </ul>
@@ -79,27 +97,84 @@
   </div>
 </template>
 <script>
-import { DEPARTMENT_NAME } from "../data";
-
+import { Enums } from "@/assets/Constants";
 export default {
   data() {
     return {
-      tempInput: this.option_default,
+      tempInput: this.value || this.option_default,
       visible: false,
+      listOption: this.$props.options,
     };
   },
   methods: {
+    /**
+     * Thay đổi input trong filter
+     * Author : Vu Minh Dang (05/11/2022)
+     */
+    onChange() {
+      this.listOption =
+        this.option_default === Enums.txtAssetType
+          ? this.options.filter(
+              (option) =>
+                option.fixed_asset_category_code
+                  .toLowerCase()
+                  .includes(this.tempInput.toLowerCase()) ||
+                option.fixed_asset_category_name
+                  .toLowerCase()
+                  .includes(this.tempInput.toLowerCase())
+            )
+          : this.options.filter(
+              (option) =>
+                option.department_code
+                  .toLowerCase()
+                  .includes(this.tempInput.toLowerCase()) ||
+                option.department_name
+                  .toLowerCase()
+                  .includes(this.tempInput.toLowerCase())
+            );
+    },
+
+    /**
+     * Ẩn hiện các options
+     * Author : Vu Minh Dang (05/11/2022)
+     */
     toggle() {
       this.visible = !this.visible;
-      console.log(this.$refs.firstFocus.children[0]);
-      if (this.visible) {
-        console.log(this.visible);
-        this.$refs.firstFocus.children[0].focus();
-      }
     },
+
+    /**
+     * Chọn 1 option
+     * Author : Vu Minh Dang (05/11/2022)
+     */
     select(option) {
-      this.tempInput = option;
-      this.$emit("inputData", option, this.title);
+      console.log(option);
+      if (this.tempInput === this.option_default) {
+        this.tempInput =
+          option?.department_code || option?.fixed_asset_category_code;
+      } else {
+        if (
+          this.tempInput === option?.department_code ||
+          this.tempInput === option?.fixed_asset_category_code
+        ) {
+          this.tempInput = this.option_default;
+          option = null;
+        } else {
+          this.tempInput =
+            option?.department_code || option?.fixed_asset_category_code;
+        }
+      }
+      this.$emit(
+        "inputData",
+        this.tempInput === this.option_default ? "" : this.tempInput,
+        this.title
+      );
+      this.$props.hasFilterIcon &&
+        (this.$props.option_default === Enums.txtDepartment
+          ? this.emitter.emit("changeDepartment", option?.department_id || "")
+          : this.emitter.emit(
+              "changeCategory",
+              option?.fixed_asset_category_id || ""
+            ));
     },
   },
 
@@ -119,19 +194,35 @@ export default {
       type: String,
       required: true,
     },
+    value: String,
   },
-  setup() {
-    return { DEPARTMENT_NAME };
+
+  created() {
+    this.listOption = this.$props.options;
   },
-  created() {},
+  // beforeUpdate() {
+  //   if (this.visible) {
+  //     this.$refs.firstFocus.children[0].focus();
+  //   }
+  // },
 };
 </script>
 <style lang="css" scoped>
+.item_name {
+  text-overflow: clip;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.input {
+  border: none;
+  outline: none;
+  background-color: #f9fafc;
+}
 .item:focus {
   background-color: salmon;
 }
 .aselect {
-  width: calc(100%-16px);
+  width: calc(100% - 16px);
 }
 .title {
   font-size: 13px;
@@ -144,11 +235,11 @@ export default {
 
 .label_selected {
   font-style: italic;
-  opacity: 0.5;
+  opacity: 0.8;
 }
 .selector {
   border: 1px solid #afafaf;
-  background-color: #fff;
+  background-color: #f9fafc;
   position: relative;
   border-radius: 2.5px;
   cursor: pointer;
@@ -191,7 +282,7 @@ ul {
   border: none;
   position: absolute;
   z-index: 1;
-  background: #fff;
+  background: #f9fafc;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
   margin-top: 1px;
   left: -1px;
@@ -220,7 +311,7 @@ li:hover {
 .item_suggest_box {
   position: absolute;
   left: -1px;
-  background-color: #fff;
+  background-color: #f9fafc;
   width: calc(100% + 2px);
   top: 35px;
   box-shadow: 0 2px 6px rgb(0 0 0 / 16%);

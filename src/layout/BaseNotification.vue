@@ -3,13 +3,22 @@
     <div class="confirm">
       <div class="content">
         <i class="fa-solid fa-triangle-exclamation confirm_icon"></i>
-        <div class="confirm_text">
-          <b>{{ num }}</b>
+        <div class="confirm_text" v-if="errorList">
+          <div
+            v-for="(error, i) in errorList"
+            :key="i"
+            style="margin-bottom: 6px"
+          >
+            {{ error }}!
+          </div>
+        </div>
+        <div class="confirm_text" v-else>
+          <b v-show="num > 1">{{ num }}</b>
           {{ textWarning }}
         </div>
       </div>
       <div class="footer">
-        <button class="btn-cancel" @click="onClickClose()">
+        <button class="btn-save" @click="onClickClose()">
           {{ Enums.btnClose }}
         </button>
       </div>
@@ -27,9 +36,13 @@ export default {
     };
   },
   methods: {
+    /**
+     * CLick vào nút đóng
+     * Author : Vu Minh Dang (25/10/2022)
+     */
     onClickClose() {
       this.setIsShowNotify();
-      this.setToggleConfirm();
+      this.setToggleConfirm && this.setToggleConfirm();
     },
   },
   props: {
@@ -37,6 +50,7 @@ export default {
     setIsShowNotify: Function,
     setToggleConfirm: Function,
     num: String,
+    errorList: Array,
   },
   setup() {
     return {
@@ -107,39 +121,6 @@ export default {
   justify-content: flex-end;
   padding: 20px 0;
   border-radius: 0 0px 4px 4px;
-}
-.btn-cancel {
-  background-color: #fff;
-  padding: 10px 0px;
-  border: 1px solid #b1b1b1;
-  border-radius: 3.5px;
-  margin-right: 10px;
-  cursor: pointer;
-  font-size: 14px;
-  width: 100px;
-  outline: none;
-}
-.btn-unCancel {
-  background-color: #fff;
-  padding: 10px 0;
-  border: 1px solid #1ba4c8;
-  border-radius: 3.5px;
-  margin-right: 10px;
-  cursor: pointer;
-  font-size: 14px;
-  color: #1ba4c8;
-  width: 100px;
-  outline: none;
-}
-
-.btn-unCancel:hover {
-  background-color: #d1edf4;
-}
-
-.btn-cancel:hover,
-:focus {
-  background-color: #1aa4c8;
-  color: #fff;
 }
 .btn-save {
   background-color: rgb(26, 164, 200);

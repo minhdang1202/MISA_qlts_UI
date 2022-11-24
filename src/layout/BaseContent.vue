@@ -1,13 +1,11 @@
 <template lang="">
   <div id="my-content" class="content">
     <transition name="toast">
-      <Toast v-show="showToast" />
+      <Toast v-if="showToast" :deleteSuccess="deleteSuccess" />
     </transition>
     <Confirm
       v-if="isShowConfirm"
       :type="typeDelete"
-      :assetCode="listSelected.length <= 1 && listSelected[0].assetCode"
-      :assetName="listSelected.length <= 1 && listSelected[0].assetName"
       :setToggleConfirm="setToggleConfirm"
       :listSelected="listSelected"
     />
@@ -17,9 +15,8 @@
         <Input />
 
         <Combobox
-          :options="departments"
+          :options="categories"
           :option_default="Enums.txtAssetType"
-          hideScroll
           hasCheck
           lineHeight="15px"
           :style="{ width: '219px' }"
@@ -29,7 +26,6 @@
         <Combobox
           :options="departments"
           :option_default="Enums.txtDepartment"
-          hideScroll
           hasCheck
           lineHeight="15px"
           :style="{ width: '219px' }"
@@ -39,7 +35,11 @@
       </div>
       <div class="enter_choice">
         <AddButton />
-        <button class="btn btn_box" :title="Enums.txtExportFile">
+        <button
+          class="btn btn_box"
+          :title="Enums.txtExportFile"
+          :disabled="listSelected.length === 0"
+        >
           <div class="btn btn_excel"></div>
         </button>
         <button
@@ -62,17 +62,20 @@ import BaseInput from "../components/BaseInput.vue";
 import AddButton from "../components/AddButton.vue";
 import BaseCombobox from "../components/BaseCombobox.vue";
 import BaseToast from "../components/BaseToast.vue";
-import { showToast } from "../state";
+import { showToast, openToast } from "../state";
 import BaseConfirm from "../layout/BaseConfirm.vue";
+import axios from "axios";
 
 export default {
   name: "my-content",
   data() {
     return {
-      departments: ["A", "B", "C", "D", "E", "F"],
+      departments: [],
+      categories: [],
       listSelected: [],
       typeDelete: 0,
       isShowConfirm: false,
+      deleteSuccess: false,
     };
   },
   components: {
@@ -84,23 +87,63 @@ export default {
     Confirm: BaseConfirm,
   },
   methods: {
+    /**
+     * Lấy danh sách tài sản được chọn
+     * Author : Vu Minh Dang (25/10/2022)
+     */
     updateListSelected(list) {
       this.listSelected = list;
     },
 
+    /**
+     * Sự kiện ấn vào nút Click
+     * Author : Vu Minh Dang (25/10/2022)
+     */
     onClickDelete() {
       this.setToggleConfirm();
       if (this.listSelected.length === 1) {
         this.typeDelete = TypeConfirm.deleteAsset;
-      } else this.typeDelete = TypeConfirm.deleteMultipleAsset;
+      } else {
+        this.typeDelete = TypeConfirm.deleteMultipleAsset;
+      }
+      this.deleteSuccess = true;
     },
 
+    /**
+     * Ẩn hiện cảnh báo
+     * Author : Vu Minh Dang (25/10/2022)
+     */
     setToggleConfirm() {
       this.isShowConfirm = !this.isShowConfirm;
     },
   },
   setup() {
-    return { showToast, Enums };
+    return { showToast, openToast, Enums };
+  },
+  mounted() {
+    //Lấy danh sách phòng ban
+    axios
+      .get("http://localhost:5137/api/Department")
+      .then((response) => {
+        this.departments = response?.data;
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+
+    //Lấy danh sách loại tài sản
+    axios
+      .get("http://localhost:5137/api/FixedAssetCategory")
+      .then((response) => {
+        this.categories = response?.data;
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+
+    this.emitter.on("deleteSuccess", () => {
+      setTimeout(() => (this.deleteSuccess = false), 1500);
+    });
   },
 };
 </script>
@@ -187,8 +230,13 @@ export default {
   cursor: pointer;
 }
 .btn_box:disabled {
-  background-color: #f5f5f5;
+  background-color: #555555;
   cursor: no-drop;
+}
+.btn_box:disabled > .btn_delete {
+  background: url("../assets/qlts-icon.svg") no-repeat -419px -111px;
+  width: 18px;
+  height: 18px;
 }
 .btn_excel {
   background: url("../assets/qlts-icon.svg") no-repeat -287px -111px;
@@ -196,7 +244,7 @@ export default {
   height: 17px;
 }
 .btn_delete {
-  background: url("../assets/qlts-icon.svg") no-repeat -463px -111px;
+  background: url("../assets/qlts-icon.svg") no-repeat -419px -111px;
   width: 18px;
   height: 18px;
 }

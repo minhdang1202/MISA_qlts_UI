@@ -4,7 +4,7 @@
     <router-view />
   </div>
   <Modal
-    title="Thêm tài sản"
+    :title="Enums.txtAddAsset"
     v-if="show_modal === true"
     :toggleModal="toggleModal"
     :type="TypeConfirm.addForm"
@@ -16,7 +16,7 @@ import BaseNavbar from "./layout/BaseNavbar.vue";
 import BaseModal from "./layout/BaseModal.vue";
 import { show_modal, toggleModal } from "./state";
 import { TypeConfirm } from "@/assets/Constants";
-
+import { Enums } from "@/assets/Constants";
 export default {
   name: "App",
 
@@ -25,6 +25,7 @@ export default {
       show_modal,
       toggleModal,
       TypeConfirm,
+      Enums,
     };
   },
 

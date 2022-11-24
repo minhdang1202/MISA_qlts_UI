@@ -6,7 +6,8 @@
           <div class="icon_success"></div>
         </div>
       </div>
-      {{ Enums.txtSaveSuccess }}
+      <span v-if="deleteSuccess">{{ Enums.txtDeleteSuccess }}</span>
+      <span v-else>{{ Enums.txtSaveSuccess }}</span>
     </div>
   </div>
 </template>
@@ -17,6 +18,9 @@ import { Enums } from "@/assets/Constants";
 export default {
   setup() {
     return { Enums };
+  },
+  props: {
+    deleteSuccess: Boolean,
   },
 };
 </script>
@@ -61,7 +65,7 @@ export default {
   box-shadow: 1px 3px 5px rgba(0, 0, 0, 0.2);
   width: 360px;
   position: absolute;
-  right: 0px;
+  right: 70px;
   display: flex;
   align-items: center;
 }

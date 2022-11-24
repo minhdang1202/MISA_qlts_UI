@@ -16,8 +16,12 @@ export const Enums = {
   notifyDeleteMultipleAsset:
     " tài sản được chọn không thể xóa. Vui lòng kiểm tra lại tài sản trước khi thực hiện xóa",
 
+  txtAddAsset: "Thêm tài sản",
   txtSaveSuccess: "Lưu dữ liệu thành công",
+  txtDeleteSuccess: "Xóa dữ liệu thành công",
   txtValidateEmpty: "Thông tin này không được phép để trống",
+  txtValidateCompare: "Tỷ lệ hao mòn phải bằng 1/Số năm sử dụng",
+  txtValidateNumber: "Số liệu nhập phải lớn hơn 0",
   txtValidateDate: "Định dạng thời gian không đúng",
   txtDelete: "Xóa",
   txtExportFile: "Xuất file excel",
@@ -54,7 +58,7 @@ export const Enums = {
   txtHmKh: "MH/KH lũy kế",
   txtRemainValue: "Giá trị còn lại",
   txtFunction: "Chức năng",
-  txtAssetCloning: "Nhân bản tài sản",
+  txtCloningAsset: "Nhân bản tài sản",
 };
 
 export const TypeConfirm = {
@@ -64,4 +68,5 @@ export const TypeConfirm = {
   deleteMultipleAsset: 3,
   deleteErrorAsset: 4,
   deleleErrorMultipleAsset: 5,
+  cloningForm: 6,
 };

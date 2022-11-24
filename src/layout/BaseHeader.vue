@@ -73,9 +73,18 @@ export default {
     };
   },
   methods: {
+    /**
+     * Ẩn hiện select năm hiện tại
+     * Author : Vu Minh Dang (25/10/2022)
+     */
     toggle() {
       this.visible = !this.visible;
     },
+
+    /**
+     * chọn năm hiện tại
+     * Author : Vu Minh Dang (25/10/2022)
+     */
     select(option) {
       this.value = option;
     },

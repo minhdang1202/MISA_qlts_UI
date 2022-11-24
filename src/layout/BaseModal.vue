@@ -1,17 +1,22 @@
 <template lang="">
   <div class="container__modal">
     <Confirm
-      v-show="isShowConfirm"
+      v-if="isShowConfirm"
       :type="type"
       :toggleModal="toggleModal"
       :setToggleConfirm="setToggleConfirm"
+    />
+    <BaseNotification
+      :errorList="errorList"
+      :setIsShowNotify="setIsShowNotify"
+      v-if="isShowNotify"
     />
     <div class="modal">
       <div class="header">
         <p>
           {{ title }}
         </p>
-        <button class="close-icon" @click="toggleModal"></button>
+        <button class="close-icon" @click="setToggleConfirm()"></button>
       </div>
 
       <div class="content">
@@ -22,6 +27,7 @@
           tabindex="0"
           @inputData="updateInput"
           ref="firstFocus"
+          max="6"
         />
         <InputModal
           :title="Enums.txtAssetName"
@@ -31,14 +37,14 @@
           :error="!hasAssetName && Enums.txtValidateEmpty"
           @inputData="updateInput"
           :isEmpty="hasAssetName"
+          max="255"
         />
         <Combobox
           :title="Enums.txtDepartmentCode"
-          :options="DEPARTMENT_CODE"
+          :options="departments"
           :option_default="Enums.txtTypingDepartmentCode"
           class="mr-20 mt-20"
           id="combo1"
-          hideScroll
           :value="departmentCode"
           @inputData="updateInput"
           :error="!hasDepartmentCode && Enums.txtValidateEmpty"
@@ -51,11 +57,10 @@
         />
         <Combobox
           :title="Enums.txtAssetTypeCode"
-          :options="DEPARTMENT_CODE"
-          :option_default="Enums.txtTypingDepartmentCode"
+          :options="categories"
+          :option_default="Enums.txtTypingAssetTypeCode"
           class="mr-20 mt-20"
           id="combo2"
-          hideScroll
           :value="assetTypeCode"
           :error="!hasAssetTypeCode && Enums.txtValidateEmpty"
           @inputData="updateInput"
@@ -75,13 +80,16 @@
           @inputData="updateInput"
           @increaseData="increase"
           @decreaseData="decrease"
+          max="4"
         />
         <InputModal
           :title="Enums.txtPrice"
           class="mt-20 mr-20"
           inputType="number"
-          :value="vueNumberFormat(price, {})"
+          :value="price"
           @inputData="updateInput"
+          :error="!hasPrice && Enums.txtValidateNumber"
+          max="18"
         />
         <InputModal
           :title="Enums.txtNumberOfYears"
@@ -89,6 +97,8 @@
           :value="numberOfYear"
           inputType="number"
           @inputData="updateInput"
+          :error="!hasNumberYear && Enums.txtValidateNumber"
+          max="2"
         />
         <InputModal
           :title="Enums.txtDepreciation"
@@ -99,6 +109,10 @@
           @inputData="updateInput"
           @increaseData="increase"
           @decreaseData="decrease"
+          :error="
+            (!hasDepreciation && Enums.txtValidateNumber) ||
+            (!compare && Enums.txtValidateCompare)
+          "
         />
         <InputModal
           :title="Enums.txtDepreciationValue"
@@ -115,23 +129,25 @@
           disabled
           @inputData="updateInput"
         />
+
         <InputModal
           :title="Enums.txtBuyingDate"
           class="mt-20 mr-20"
           inputType="date"
-          :value="buyingDate"
+          :value="purchaseDate"
           @inputData="updateInput"
-          :error="!buyingDate && Enums.txtValidateDate"
+          :error="!purchaseDate && Enums.txtValidateDate"
         />
         <InputModal
           :title="Enums.txtUsingDate"
           class="mt-20 mr-20"
           inputType="date"
-          :value="usingDate"
+          :value="productionTime"
           @inputData="updateInput"
-          :error="!usingDate && Enums.txtValidateDate"
+          :error="!productionTime && Enums.txtValidateDate"
         />
       </div>
+
       <div class="footer">
         <button class="btn-cancel" @click="setToggleConfirm()">
           {{ Enums.btnCancel }}
@@ -150,65 +166,114 @@
 <script>
 import BaseInputModal from "../components/BaseInputModal.vue";
 import BaseCombobox from "../components/BaseCombobox.vue";
-import { DEPARTMENT_NAME } from "../data";
+import BaseNotification from "../layout/BaseNotification.vue";
 import { openToast } from "../state";
 import BaseConfirm from "./BaseConfirm.vue";
 import { Enums } from "@/assets/Constants";
+import axios from "axios";
+import { NIL as NIL_UUID } from "uuid";
 export default {
   data() {
     return {
-      number: {
-        decimal: ".",
-        separator: ",",
-        prefix: "$ ",
-        precision: 2,
-      },
-
+      isChangeData: false,
+      isShowNotify: false,
       isShowConfirm: false,
+      departments: [],
+      categories: [],
+      errorList: [],
+      departmentId: this.dataAsset?.department_id || NIL_UUID,
+      assetCode:
+        this.title === Enums.txtEditAsset
+          ? this.dataAsset?.fixed_asset_code
+          : "",
+      assetName: this.dataAsset?.fixed_asset_name || "",
+      departmentCode: this.dataAsset?.department_code || "",
+      departmentName: this.dataAsset?.department_name || "",
+      assetTypeId: this.dataAsset?.fixed_asset_category_id || NIL_UUID,
+      assetTypeCode: this.dataAsset?.fixed_asset_category_code || "",
+      assetTypeName: this.dataAsset?.fixed_asset_category_name || "",
+      quantity: this.dataAsset?.quantity || 1,
+      price: this.dataAsset?.cost || 0,
+      numberOfYear: this.dataAsset?.life_time || 0,
+      depreciation: this.dataAsset?.depreciation_rate || 0,
+      depreciationValue: this.dataAsset?.depreciation_year || 0,
+      yearTracking:
+        this.dataAsset?.tracked_year || String(new Date().getFullYear()),
+      purchaseDate: this.$props.dataAsset
+        ? this.dateToString(new Date(this.dataAsset?.purchase_date))
+        : this.dateToString(new Date()),
+      productionTime: this.$props.dataAsset
+        ? this.dateToString(new Date(this.dataAsset?.production_time))
+        : this.dateToString(new Date()),
 
-      DEPARTMENT_CODE: ["A", "B", "C", "D", "E", "F"],
-      assetCode: "TS000001",
-      assetName: "",
-      departmentCode: "",
-      departmentName: "",
-      assetTypeCode: "",
-      assetTypeName: "",
-      quantity: 1,
-      price: 0,
-      numberOfYear: 0,
-      depreciation: 0,
-      depreciationValue: 0,
-      yearTracking: String(new Date().getFullYear()),
-      buyingDate: this.getCurrentDate(),
-      usingDate: this.getCurrentDate(),
       hasAssetName: true,
       hasDepartmentCode: true,
       hasAssetTypeCode: true,
+      hasNumberYear: true,
+      hasPrice: true,
+      hasDepreciation: true,
+      compare: true,
     };
   },
   props: {
     title: String,
     toggleModal: Function,
     type: Number,
+    dataAsset: Object,
+    isShowModal: Boolean,
   },
   components: {
     InputModal: BaseInputModal,
     Combobox: BaseCombobox,
     Confirm: BaseConfirm,
+    BaseNotification,
   },
 
   methods: {
+    /**
+     * Ẩn hiện cảnh báo
+     * Create by Vu Minh Dang (15/11/2022)
+     */
+    setIsShowNotify() {
+      this.isShowNotify = !this.isShowNotify;
+    },
+
+    /**
+     * Chuyển dateTime api trả về sang string
+     * Author : Vu Minh Dang (25/10/2022)
+     */
+    dateToString(date) {
+      const newDate = `${date.getDate()}/${
+        date.getMonth() + 1
+      }/${date.getFullYear()}`;
+
+      return newDate;
+    },
+
+    /**
+     * Tính giá trị hao mòn năm
+     * Author : Vu Minh Dang (1/11/2022)
+     */
     calDepreciationValue() {
       if (this.depreciation !== 0 && this.price !== 0) {
-        this.depreciationValue = this.depreciation * this.price;
+        this.depreciationValue = (this.depreciation * this.price) / 100;
       } else {
         this.depreciationValue = 0;
       }
     },
 
+    /**
+     * Ẩn hiện confirm hủy
+     * Author : Vu Minh Dang (1/11/2022)
+     */
     setToggleConfirm() {
-      this.isShowConfirm = !this.isShowConfirm;
+      if (this.isChangeData) {
+        this.isShowConfirm = !this.isShowConfirm;
+      } else {
+        this.toggleModal();
+      }
     },
+
     /**
      * Validate dữ liệu sau khi submit
      * Author : Vu Minh Dang (25/10/2022)
@@ -229,18 +294,181 @@ export default {
       } else {
         this.hasAssetTypeCode = true;
       }
+      if (this.depreciation <= 0) {
+        this.hasDepreciation = false;
+      } else {
+        this.hasDepreciation = true;
+      }
+      if (this.numberOfYear <= 0) {
+        this.hasNumberYear = false;
+      } else {
+        this.hasNumberYear = true;
+      }
+      if (this.price <= 0) {
+        this.hasPrice = false;
+      } else {
+        this.hasPrice = true;
+      }
+
+      if (
+        Math.round(this.depreciation * 100) / 100 !==
+          Math.round((1 / this.numberOfYear + Number.EPSILON) * 10000) / 100 &&
+        this.depreciation !== 0 &&
+        this.numberOfYear !== 0
+      ) {
+        this.compare = false;
+      } else {
+        this.compare = true;
+      }
     },
 
     /**
      * Sự kiện submit form
      * Author : Vu Minh Dang (25/10/2022)
      */
-
     submitHandler() {
       this.validateData();
+      this.errorList = "";
 
-      openToast();
-      // setTimeout(() => this.toggleModal(), 500);
+      this.$props.title === Enums.txtEditAsset &&
+        axios
+          .put(
+            `http://localhost:5137/api/FixedAsset/${this.$props.dataAsset.fixed_asset_id}`,
+            {
+              fixed_asset_id: this.$props.dataAsset.fixed_asset_id,
+              fixed_asset_code: this.assetCode,
+              fixed_asset_name: this.assetName,
+              department_id: this.departmentId || NIL_UUID,
+              department_code: this.departmentCode,
+              department_name: this.departmentName,
+              fixed_asset_category_id: this.assetTypeId || NIL_UUID,
+              fixed_asset_category_code: this.assetTypeCode,
+              fixed_asset_category_name: this.assetTypeName,
+              purchase_date:
+                this.dateToString(new Date(this.dataAsset?.purchase_date)) !==
+                this.purchaseDate
+                  ? new Date(this.purchaseDate)
+                  : new Date(this.stringToDate(this.purchaseDate)),
+              cost: this.price,
+              quantity: this.quantity,
+              depreciation_rate:
+                Math.round((this.depreciation + Number.EPSILON) * 100) / 100 ===
+                Math.round((1 / this.numberOfYear + Number.EPSILON) * 10000) /
+                  100
+                  ? Math.round(
+                      (1 / this.numberOfYear + Number.EPSILON) * 1000000
+                    ) / 10000
+                  : this.depreciation,
+              tracked_year: this.yearTracking,
+              life_time: this.numberOfYear,
+              production_time:
+                this.dateToString(new Date(this.dataAsset?.production_time)) !==
+                this.productionTime
+                  ? new Date(this.productionTime)
+                  : new Date(this.stringToDate(this.productionTime)),
+              active: true,
+              modified_by: "Minh Dang",
+            }
+          )
+          .then(() => {
+            openToast();
+            setTimeout(() => this.toggleModal(), 500);
+            this.emitter.emit("changeAsset");
+          })
+          .catch((e) => {
+            console.log(e);
+            this.errorList = e.response.data.MoreInfo;
+            this.setIsShowNotify();
+          });
+
+      this.$props.title === Enums.txtCloningAsset &&
+        axios
+          .post("http://localhost:5137/api/FixedAsset/", {
+            fixed_asset_code: this.assetCode,
+            fixed_asset_name: this.assetName,
+            department_id: this.departmentId || NIL_UUID,
+            department_code: this.departmentCode,
+            department_name: this.departmentName,
+            fixed_asset_category_id: this.assetTypeId || NIL_UUID,
+            fixed_asset_category_code: this.assetTypeCode,
+            fixed_asset_category_name: this.assetTypeName,
+            cost: this.price,
+            purchase_date:
+              this.dateToString(new Date(this.dataAsset?.purchase_date)) !==
+              this.purchaseDate
+                ? new Date(this.purchaseDate)
+                : new Date(this.stringToDate(this.purchaseDate)),
+            quantity: this.quantity,
+            depreciation_rate:
+              Math.round((this.depreciation + Number.EPSILON) * 100) / 100 ===
+              Math.round((1 / this.numberOfYear + Number.EPSILON) * 10000) / 100
+                ? Math.round(
+                    (1 / this.numberOfYear + Number.EPSILON) * 1000000
+                  ) / 10000
+                : this.depreciation,
+            tracked_year: this.yearTracking,
+            life_time: this.numberOfYear,
+            production_time:
+              this.dateToString(new Date(this.dataAsset?.production_time)) !==
+              this.productionTime
+                ? new Date(this.productionTime)
+                : new Date(this.stringToDate(this.productionTime)),
+            active: true,
+            created_by: "Minh Dang",
+            modified_by: "Minh Dang",
+          })
+          .then(() => {
+            openToast();
+            setTimeout(() => this.toggleModal(), 500);
+            this.emitter.emit("changeAsset");
+          })
+          .catch((e) => {
+            this.errorList = e.response.data.MoreInfo;
+            this.setIsShowNotify();
+          });
+      this.$props.title === Enums.txtAddAsset &&
+        axios
+          .post("http://localhost:5137/api/FixedAsset/", {
+            fixed_asset_code: this.assetCode,
+            fixed_asset_name: this.assetName,
+            department_id: this.departmentId || NIL_UUID,
+            department_code: this.departmentCode,
+            department_name: this.departmentName,
+            fixed_asset_category_id: this.assetTypeId || NIL_UUID,
+            fixed_asset_category_code: this.assetTypeCode,
+            fixed_asset_category_name: this.assetTypeName,
+            purchase_date:
+              this.dateToString(new Date()) !== this.purchaseDate
+                ? new Date(this.purchaseDate)
+                : new Date(this.stringToDate(this.purchaseDate)),
+            cost: this.price,
+            quantity: this.quantity,
+            depreciation_rate:
+              Math.round((this.depreciation + Number.EPSILON) * 100) / 100 ===
+              Math.round((1 / this.numberOfYear + Number.EPSILON) * 10000) / 100
+                ? Math.round(
+                    (1 / this.numberOfYear + Number.EPSILON) * 1000000
+                  ) / 10000
+                : this.depreciation,
+            tracked_year: this.yearTracking,
+            life_time: this.numberOfYear,
+            production_time:
+              this.dateToString(new Date()) !== this.productionTime
+                ? new Date(this.productionTime)
+                : new Date(this.stringToDate(this.productionTime)),
+            active: true,
+            created_by: "Minh Dang",
+            modified_by: "Minh Dang",
+          })
+          .then(() => {
+            openToast();
+            setTimeout(() => this.toggleModal(), 500);
+            this.emitter.emit("changeAsset");
+          })
+          .catch((e) => {
+            this.errorList = e.response.data.MoreInfo;
+            this.setIsShowNotify();
+          });
     },
 
     /**
@@ -257,10 +485,9 @@ export default {
     },
 
     /**
-     * Update các biến sau khi nhập các input
+     * Tăng giá trị trong input
      * Author : Vu Minh Dang (25/10/2022)
      */
-
     increase(data, type) {
       switch (type) {
         case Enums.txtQuantity:
@@ -272,6 +499,11 @@ export default {
           return;
       }
     },
+
+    /**
+     * Giảm giá trị trong input
+     * Author : Vu Minh Dang (25/10/2022)
+     */
     decrease(data, type) {
       switch (type) {
         case Enums.txtQuantity:
@@ -284,19 +516,38 @@ export default {
       }
     },
 
+    /**
+     * Update các biến sau khi nhập các input
+     * Author : Vu Minh Dang (25/10/2022)
+     */
     updateInput(data, type) {
+      this.isChangeData = true;
       switch (type) {
+        case Enums.txtAssetCode:
+          this.assetCode = data;
+          return;
         case Enums.txtBuyingDate:
-          this.buyingDate = data;
+          this.purchaseDate = data;
           return;
         case Enums.txtUsingDate:
-          this.usingDate = data;
+          this.productionTime = data;
           return;
         case Enums.txtAssetTypeCode:
+          var category =
+            this.categories[
+              this.categories.findIndex(
+                (category) => category.fixed_asset_category_code === data
+              )
+            ];
           this.assetTypeCode = data;
           this.hasAssetTypeCode = true;
-          this.assetTypeName =
-            DEPARTMENT_NAME[this.DEPARTMENT_CODE.indexOf(data)];
+          this.assetTypeName = category?.fixed_asset_category_name;
+          this.assetTypeId = category?.fixed_asset_category_id;
+          this.numberOfYear = category?.life_time;
+          this.depreciation = category?.depreciation_rate;
+          this.hasDepreciation = true;
+          this.hasNumberYear = true;
+          this.calDepreciationValue();
           return;
         case Enums.txtQuantity:
           this.quantity = data;
@@ -306,21 +557,37 @@ export default {
           return;
         case Enums.txtPrice:
           this.price = data;
+          this.hasPrice = true;
           this.calDepreciationValue();
           return;
         case Enums.txtNumberOfYears:
           this.numberOfYear = data;
-          return;
-        case Enums.txtDepreciation:
-          this.depreciation = data;
+          this.hasNumberYear = true;
+          this.hasDepreciation = true;
+
+          this.depreciation =
+            data === 0
+              ? 0
+              : Math.round((1 / data + Number.EPSILON) * 1000000) / 10000;
           this.calDepreciationValue();
           return;
 
+        case Enums.txtDepreciation:
+          this.depreciation = data;
+          this.hasDepreciation = true;
+          this.calDepreciationValue();
+          return;
         case Enums.txtDepartmentCode:
           this.departmentCode = data;
           this.hasDepartmentCode = true;
-          this.departmentName =
-            DEPARTMENT_NAME[this.DEPARTMENT_CODE.indexOf(data)];
+          var department =
+            this.departments[
+              this.departments.findIndex(
+                (department) => department.department_code === data
+              )
+            ];
+          this.departmentName = department?.department_name;
+          this.departmentId = department?.department_id;
           return;
         case Enums.txtAssetName:
           this.assetName = data;
@@ -328,18 +595,68 @@ export default {
           return;
       }
     },
+
+    /**
+     * convert String to Date input values
+     * Author : Vu Minh Dang (25/10/2022)
+     */
+    stringToDate(str) {
+      const [day, month, year] = str.split("/");
+
+      const date = `${year}-${month < 10 ? "0" : ""}${month}-${
+        day < 10 ? "0" : ""
+      }${day}`;
+      return date;
+    },
+
+    /**
+     * Lấy tất cả các phòng ban
+     * Create by Vu Minh Dang(15/11/2022)
+     */
+    getAllDepartments() {
+      axios
+        .get("http://localhost:5137/api/Department")
+        .then((response) => {
+          this.departments = response?.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+    /**
+     * Lấy tất cả các loại tài sản
+     * Create by Vu Minh Dang(15/11/2022)
+     */
+    getAllCategories() {
+      axios
+        .get("http://localhost:5137/api/FixedAssetCategory")
+        .then((response) => {
+          this.categories = response?.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
   },
+
   setup() {
     return {
-      DEPARTMENT_NAME,
       openToast,
       Enums,
     };
   },
 
   mounted() {
+    this.getAllDepartments();
+    this.getAllCategories();
     this.$refs.firstFocus.$el.lastChild.firstChild.focus();
+    this.emitter.on("changeCode", (payload) => (this.assetCode = payload));
+    this.emitter.on("submit", () => {
+      this.submitHandler();
+    });
   },
+  updated() {},
 };
 </script>
 <style lang="css" scoped>

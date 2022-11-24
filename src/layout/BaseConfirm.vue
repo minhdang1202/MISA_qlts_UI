@@ -15,7 +15,7 @@
       <div class="content">
         <i class="fa-solid fa-triangle-exclamation confirm_icon"></i>
         <div class="confirm_text">
-          <b v-show="type === TypeConfirm.deleteMultipleAsset">
+          <b v-if="type === TypeConfirm.deleteMultipleAsset">
             {{
               listSelected?.length < 10
                 ? `0${listSelected?.length}`
@@ -23,13 +23,19 @@
             }}
           </b>
           {{ textWarning }}
-          <b v-show="type === TypeConfirm.deleteAsset">
-            {{ assetCode }} - {{ assetName }} </b
-          >?
+          <b v-if="type === TypeConfirm.deleteAsset">
+            {{ listSelected[0]?.fixed_asset_code }} -
+            {{ listSelected[0]?.fixed_asset_name }}
+          </b>
+          ?
         </div>
       </div>
       <div class="footer">
-        <div v-show="type === TypeConfirm.addForm">
+        <div
+          v-if="
+            type === TypeConfirm.addForm || type === TypeConfirm.cloningForm
+          "
+        >
           <button class="btn-cancel" @click="setToggleConfirm()">
             {{ Enums.btnNo }}
           </button>
@@ -37,7 +43,7 @@
             {{ Enums.btnCancel }}
           </button>
         </div>
-        <div v-show="type === TypeConfirm.editForm">
+        <div v-if="type === TypeConfirm.editForm">
           <button class="btn-cancel" @click="onClickCancel()">
             {{ Enums.btnCancel }}
           </button>
@@ -49,7 +55,7 @@
           </button>
         </div>
         <div
-          v-show="
+          v-if="
             type === TypeConfirm.deleteAsset ||
             type === TypeConfirm.deleteMultipleAsset
           "
@@ -69,6 +75,7 @@
 import { openToast } from "../state";
 import { Enums, TypeConfirm } from "@/assets/Constants";
 import BaseNotification from "./BaseNotification.vue";
+// import axios from "axios";
 export default {
   data() {
     return {
@@ -80,27 +87,48 @@ export default {
     Notification: BaseNotification,
   },
   methods: {
+    /**
+     * Ẩn hiện cảnh báo
+     * Create by Vu Minh Dang (15/11/2022)
+     */
     setIsShowNotify() {
       this.isShowNotify = !this.isShowNotify;
     },
+
+    /**
+     * Thực hiện khi click vào nút cancel
+     * Create by Vu Minh Dang (15/11/2022)
+     */
     onClickCancel() {
       this.setToggleConfirm();
       this.toggleModal();
     },
+
+    /**
+     * Thực hiện khi click vào nút save
+     * Create by Vu Minh Dang (15/11/2022)
+     */
     onClickSave() {
-      openToast();
+      this.emitter.emit("submit");
       this.setToggleConfirm();
-      this.toggleModal();
     },
+
+    /**
+     * Thực hiện khi click vào nút delete
+     * Create by Vu Minh Dang (15/11/2022)
+     */
     onClickDelete() {
-      this.setIsShowNotify();
+      this.setToggleConfirm();
+      const assetDeletes = [];
+      this.listSelected?.forEach((select) => {
+        assetDeletes.push(select.fixed_asset_id);
+      });
+      this.emitter.emit("deleteAsset", assetDeletes);
     },
   },
   props: {
     type: Number,
     toggleModal: Function,
-    assetCode: String,
-    assetName: String,
     setToggleConfirm: Function,
     listSelected: Array,
   },
@@ -115,6 +143,8 @@ export default {
   created() {
     switch (this.type) {
       case TypeConfirm.addForm:
+        return (this.textWarning = Enums.quesCancelDeclaration);
+      case TypeConfirm.cloningForm:
         return (this.textWarning = Enums.quesCancelDeclaration);
       case TypeConfirm.editForm:
         return (this.textWarning = Enums.quesCancelChange);
@@ -137,6 +167,7 @@ export default {
 .confirm_text {
   margin-left: 20px;
   font-size: 14px;
+  margin-top: 20px;
 }
 .container__confirm {
   position: fixed;
@@ -146,8 +177,7 @@ export default {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgb(0, 0, 0);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -162,7 +192,8 @@ export default {
 .content {
   display: flex;
   align-items: center;
-  padding: 40px 30px 30px 30px;
+  padding: 30px 30px 20px 30px;
+  line-height: 1.5;
 }
 .mr-20 {
   margin-right: 16px;
@@ -175,7 +206,7 @@ export default {
   width: 100%;
   display: flex;
   justify-content: flex-end;
-  padding: 20px 0;
+  padding: 10px 0 25px 0px;
   border-radius: 0 0px 4px 4px;
 }
 .btn-cancel {

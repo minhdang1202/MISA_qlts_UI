@@ -26,9 +26,13 @@
                     ? item.active
                     : item.icon
                 } `"
+                :title="item.title"
               ></div>
               <transition name="fade">
-                <p v-if="is_expanded">
+                <p
+                  v-if="is_expanded"
+                  :class="`${item.name === 'ht_db' && 'ht'}`"
+                >
                   {{ item.title }}
                 </p>
               </transition>
@@ -41,8 +45,20 @@
         </li>
       </ul>
     </div>
-    <div class="nav-bottom" v-if="is_expanded">
-      <button class="back-icon" @click="toggleMenu"></button>
+    <div
+      class="nav-bottom"
+      :style="{ justifyContent: is_expanded ? 'end' : 'center' }"
+    >
+      <button
+        class="back-icon"
+        @click="toggleMenu"
+        v-show="is_expanded"
+      ></button>
+      <button
+        class="show-icon"
+        @click="toggleMenu"
+        v-show="!is_expanded"
+      ></button>
     </div>
   </div>
 </template>
@@ -63,6 +79,12 @@ export default {
 };
 </script>
 <style scoped>
+.ht {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 120px;
+  overflow: hidden;
+}
 .navbar {
   width: 66px;
   height: 100vh;
@@ -247,7 +269,6 @@ export default {
   bottom: 0;
   height: 40px;
   display: flex;
-  justify-content: end;
   align-items: center;
   transition: 0.2s ease-out;
 }
@@ -259,6 +280,13 @@ export default {
   border: none;
   float: right;
   margin-right: 13px;
+  opacity: 0.8;
+}
+.show-icon {
+  background: url("../assets/qlts-icon.svg") no-repeat -329px -417px;
+  width: 22px;
+  height: 22px;
+  border: none;
   opacity: 0.8;
 }
 </style>

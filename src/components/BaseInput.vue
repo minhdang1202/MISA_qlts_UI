@@ -6,12 +6,29 @@
       class="input"
       :placeholder="Enums.txtSearch"
       :title="Enums.txtSearch"
+      v-model="keyword"
+      @blur="changeSearchKeyword()"
+      @keyup.enter="changeSearchKeyword()"
     />
   </div>
 </template>
 <script>
 import { Enums } from "@/assets/Constants";
 export default {
+  data() {
+    return {
+      keyword: "",
+    };
+  },
+  methods: {
+    /**
+     * Thay đổi keyword search tài sản
+     * Author : Vu Minh Dang (14/11/2022)
+     */
+    changeSearchKeyword() {
+      this.emitter.emit("changeSearchKeyword", this.keyword);
+    },
+  },
   props: {
     name: String,
   },

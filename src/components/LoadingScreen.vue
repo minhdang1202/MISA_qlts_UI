@@ -14,7 +14,9 @@ export default {};
 </script>
 <style>
 #loading {
-  position: absolute;
+  top: 0;
+  left: 0;
+  position: fixed;
   z-index: 1000;
   background-color: rgba(0, 0, 0, 0.7);
   height: 100vh;

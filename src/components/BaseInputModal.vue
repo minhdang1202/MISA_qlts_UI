@@ -2,30 +2,28 @@
   <div class="input" :style="{ width: width + '%' }">
     <div class="title">
       <p>{{ title }}</p>
-      <p style="color: red">*</p>
+      <p style="color: red; margin-left: 2px">*</p>
     </div>
     <div class="group-input">
       <VueNumberFormat
         v-if="inputType === 'number'"
-        :value="title === Enums.txtDepreciationValue ? value : tempInput"
+        :value="value"
         v-model:value="tempInput"
+        :maxlength="max"
         :options="{
-          prefix: title === Enums.txtQuantity && tempInput < 10 ? '0' : '',
           decimal:
             (title === Enums.txtDepreciation ||
               title === Enums.txtDepreciationValue) &&
             ',',
           thousand: '.',
-          precision:
-            (title === Enums.txtDepreciation ||
-              title === Enums.txtDepreciationValue) &&
-            2,
+          precision: title === Enums.txtDepreciation && 2,
         }"
         :style="{
           textAlign: 'right',
           paddingRight: show_icon_num ? '40px' : '14px',
         }"
         @change="onChange"
+        :min="2"
       ></VueNumberFormat>
       <input
         v-else
@@ -42,7 +40,7 @@
         :class="error && 'error'"
         :type="inputType"
         v-model="tempInput"
-        @change="onChange"
+        @input="onChange"
       />
 
       <div class="icons" v-show="show_icon_num" tabindex="-1">
@@ -55,6 +53,7 @@
 </template>
 <script>
 import { Enums } from "@/assets/Constants";
+import axios from "axios";
 
 export default {
   data() {
@@ -75,6 +74,7 @@ export default {
     show_icon_date: Boolean,
     error: String,
     autofocus: Boolean,
+    max: Number,
   },
   methods: {
     /**
@@ -89,6 +89,7 @@ export default {
       }${day}`;
       return date;
     },
+
     /**
      * convert Date to String input values
      * Author : Vu Minh Dang (25/10/2022)
@@ -102,13 +103,21 @@ export default {
     },
 
     /**
-     * change input data
+     * Thay đổi giá trị trong input
      * Author : Vu Minh Dang (25/10/2022)
      */
-
     onChange() {
       if (this.title === Enums.txtDepreciation && this.tempInput > 99.99) {
         this.tempInput = 100;
+      }
+      if (this.title === Enums.txtQuantity) {
+        if (this.tempInput < 1) {
+          this.tempInput = 1;
+        }
+      } else {
+        if (this.tempInput < 0) {
+          this.tempInput *= -1;
+        }
       }
       this.$emit("inputData", this.tempInput, this.title);
     },
@@ -125,15 +134,47 @@ export default {
       }
       this.$emit("increaseData", this.tempInput, this.title);
     },
+
+    /**
+     * Giảm 1 đơn vị
+     * Author : Vu Minh Dang (25/10/2022)
+     */
     decrease() {
-      if (this.tempInput > 0) {
-        this.tempInput -= 1;
-        this.$emit("decreaseData", this.tempInput, this.title);
+      if (this.title === Enums.txtQuantity) {
+        if (this.tempInput > 1) {
+          this.tempInput -= 1;
+        }
+      } else {
+        if (this.tempInput > 0) {
+          this.tempInput -= 1;
+        }
       }
+      this.$emit("decreaseData", this.tempInput, this.title);
+    },
+
+    /**
+     * Lấy mã tài sản lớn nhất
+     * Author : Vu Minh Dang (25/11/2022)
+     */
+    getAssetCode() {
+      axios
+        .get("http://localhost:5137/api/FixedAsset/lastest")
+        .then((response) => {
+          this.tempInput = response?.data?.lastestCode;
+          this.emitter.emit("changeCode", response?.data?.lastestCode);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     },
   },
   setup() {
     return { Enums };
+  },
+  mounted() {
+    this.$props.value === "" &&
+      this.$props.title === Enums.txtAssetCode &&
+      this.getAssetCode();
   },
 };
 </script>

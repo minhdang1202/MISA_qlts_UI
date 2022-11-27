@@ -36,12 +36,8 @@
           type="text"
           @input="onChange"
           class="input"
+          @blur="toggleSelect()"
         /> -->
-        <!-- @blur="
-            () => {
-              if (tempInput === '') tempInput = option_default;
-            }
-          " -->
       </div>
       <div class="error-message" v-show="error">{{ error }}</div>
 
@@ -103,34 +99,43 @@ export default {
     return {
       tempInput: this.value || this.option_default,
       visible: false,
-      listOption: this.$props.options,
+      listOption: this.$props.options || [],
     };
   },
+  computed: {},
   methods: {
+    toggleSelect() {
+      setTimeout(() => {
+        this.visible = false;
+      }, 100);
+    },
     /**
      * Thay đổi input trong filter
      * Author : Vu Minh Dang (05/11/2022)
      */
     onChange() {
+      var textSearchFilter =
+        this.option_default !== this.tempInput ? this.tempInput : "";
+      console.log(textSearchFilter);
       this.listOption =
         this.option_default === Enums.txtAssetType
           ? this.options.filter(
               (option) =>
                 option.fixed_asset_category_code
                   .toLowerCase()
-                  .includes(this.tempInput.toLowerCase()) ||
+                  .includes(textSearchFilter.toLowerCase()) ||
                 option.fixed_asset_category_name
                   .toLowerCase()
-                  .includes(this.tempInput.toLowerCase())
+                  .includes(textSearchFilter.toLowerCase())
             )
           : this.options.filter(
               (option) =>
                 option.department_code
                   .toLowerCase()
-                  .includes(this.tempInput.toLowerCase()) ||
+                  .includes(textSearchFilter.toLowerCase()) ||
                 option.department_name
                   .toLowerCase()
-                  .includes(this.tempInput.toLowerCase())
+                  .includes(textSearchFilter.toLowerCase())
             );
     },
 
@@ -197,9 +202,14 @@ export default {
     value: String,
   },
 
-  created() {
-    this.listOption = this.$props.options;
+  beforeUpdate() {
+    // this.onChange();
   },
+  // setup() {
+  //   this.listOption = this.$props.options;
+  //   console.log(this.options);
+  //   console.log(this.listOption);
+  // }
   // beforeUpdate() {
   //   if (this.visible) {
   //     this.$refs.firstFocus.children[0].focus();

@@ -106,7 +106,8 @@ export default {
 .content {
   display: flex;
   align-items: center;
-  padding: 40px 30px 30px 30px;
+  padding: 40px 30px 0px 30px;
+  min-height: 55px;
 }
 .mr-20 {
   margin-right: 16px;

@@ -170,7 +170,7 @@
               >
                 <label :for="`check${i}`">
                   <div class="labelBox justify-end">
-                    {{ item.quantity }}
+                    {{ vueNumberFormat(item.quantity, {}) }}
                   </div>
                 </label>
               </td>
@@ -478,6 +478,8 @@ export default {
     handleCurrentChange(val) {
       this.currentPage = val;
       this.getListAsset();
+      this.selected = [];
+      this.onChange();
     },
 
     /**

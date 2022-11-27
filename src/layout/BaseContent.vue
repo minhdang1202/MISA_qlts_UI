@@ -230,7 +230,8 @@ export default {
   cursor: pointer;
 }
 .btn_box:disabled {
-  background-color: #555555;
+  background-color: #ede3e3;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   cursor: no-drop;
 }
 .btn_box:disabled > .btn_delete {

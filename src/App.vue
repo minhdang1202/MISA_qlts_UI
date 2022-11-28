@@ -12,9 +12,9 @@
 </template>
 
 <script>
-import BaseNavbar from "./layout/BaseNavbar.vue";
-import BaseModal from "./layout/BaseModal.vue";
-import { show_modal, toggleModal } from "./state";
+import BaseNavbar from "./layout/AssetPage/BaseNavbar.vue";
+import BaseModal from "./layout/Modal/BaseModal.vue";
+import { show_modal, toggleModal } from "./js/state";
 import { TypeConfirm } from "@/assets/Constants";
 import { Enums } from "@/assets/Constants";
 export default {

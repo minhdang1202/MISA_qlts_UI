@@ -72,9 +72,9 @@
   </div>
 </template>
 <script>
-import { openToast } from "../state";
+import { openToast } from "../../js/state";
 import { Enums, TypeConfirm } from "@/assets/Constants";
-import BaseNotification from "./BaseNotification.vue";
+import BaseNotification from "../Notification/BaseNotification.vue";
 // import axios from "axios";
 export default {
   data() {

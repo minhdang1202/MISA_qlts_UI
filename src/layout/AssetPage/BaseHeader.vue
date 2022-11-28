@@ -236,31 +236,31 @@ export default {
   align-items: center;
 }
 .notification {
-  background: url("../assets/qlts-icon.svg") no-repeat -332px -109px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -332px -109px;
   width: 16px;
   height: 20px;
   transform: scale(1.2);
 }
 .system {
-  background: url("../assets/qlts-icon.svg") no-repeat -199px -23px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -199px -23px;
   width: 18px;
   height: 18px;
   transform: scale(1.2);
 }
 .support {
-  background: url("../assets/qlts-icon.svg") no-repeat -67px -67px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -67px -67px;
   width: 18px;
   height: 18px;
   transform: scale(1.2);
 }
 .profile {
-  background: url("../assets/qlts-icon.svg") no-repeat -23px -23px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -23px -23px;
   width: 18px;
   height: 18px;
   transform: scale(1.2);
 }
 .arrow-down {
-  background: url("../assets/qlts-icon.svg") no-repeat -72px -338px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -72px -338px;
   width: 7px;
   height: 5px;
   margin-left: 8px;
@@ -268,7 +268,7 @@ export default {
 }
 
 .arrow {
-  background: url("../assets/qlts-icon.svg") no-repeat -204px -332px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -204px -332px;
   width: 8px;
   height: 16px;
   margin-left: 12px;

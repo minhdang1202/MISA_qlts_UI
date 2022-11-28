@@ -25,7 +25,7 @@ export const Enums = {
   txtValidateDate: "Định dạng thời gian không đúng",
   txtDelete: "Xóa",
   txtExportFile: "Xuất file excel",
-  txtAssetType: " Loại tài sản",
+  txtAssetType: "Loại tài sản",
   txtDepartment: "Bộ phận sử dụng",
   txtAssets: "Danh sách tài sản",
   txtFinancialDepartment: "Sở tài chính",
@@ -59,6 +59,14 @@ export const Enums = {
   txtRemainValue: "Giá trị còn lại",
   txtFunction: "Chức năng",
   txtCloningAsset: "Nhân bản tài sản",
+
+  StatusCode: {
+    Ok: 200,
+    Created: 201,
+    BadRequest: 400,
+    NotFound: 404,
+    InternalServerError: 500,
+  },
 };
 
 export const TypeConfirm = {
@@ -70,3 +78,90 @@ export const TypeConfirm = {
   deleleErrorMultipleAsset: 5,
   cloningForm: 6,
 };
+
+const FixedAsset = {
+  fixed_asset_id: "ID tài sản",
+  fixed_asset_code: "Mã tài sản",
+  fixed_asset_name: "Tên tài sản",
+  department_id: "ID phòng ban",
+  department_code: "Mã phòng ban",
+  department_name: "Tên phòng ban",
+  fixed_asset_category_id: "ID loại tài sản",
+  fixed_asset_category_code: "Mã loại tài sản",
+  fixed_asset_category_name: "Tên loại tài sản",
+  quantity: "Số lượng",
+  cost: "Nguyên giá",
+  life_time: "Số năm sử dụng",
+  depreciation_rate: "Tỷ lệ hao mòn",
+  depreciation_year: "Hao mòn năm",
+  tracked_year: "Năm theo dõi",
+  purchase_date: "Ngày mua",
+  production_time: "Ngày sử dụng",
+  created_by: "Người tạo",
+  created_date: "Ngày tạo",
+  modified_by: "Người chỉnh",
+  modified_date: "Ngày chỉnh sửa",
+};
+
+export const dataColumns = [
+  {
+    label: FixedAsset.fixed_asset_id,
+    field: "fixed_asset_id",
+  },
+  {
+    label: FixedAsset.fixed_asset_code,
+    field: "fixed_asset_code",
+  },
+  {
+    label: FixedAsset.fixed_asset_name,
+    field: "fixed_asset_name",
+  },
+  {
+    label: FixedAsset.department_code,
+    field: "department_code",
+  },
+  {
+    label: FixedAsset.department_name,
+    field: "department_name",
+  },
+  {
+    label: FixedAsset.fixed_asset_category_code,
+    field: "fixed_asset_category_code",
+  },
+  {
+    label: FixedAsset.fixed_asset_category_name,
+    field: "fixed_asset_category_name",
+  },
+  {
+    label: FixedAsset.quantity,
+    field: "quantity",
+  },
+  {
+    label: FixedAsset.cost,
+    field: "cost",
+  },
+  {
+    label: FixedAsset.life_time,
+    field: "life_time",
+  },
+  {
+    label: FixedAsset.depreciation_rate,
+    field: "depreciation_rate",
+  },
+  {
+    label: FixedAsset.depreciation_year,
+    field: "depreciation_year",
+  },
+  {
+    label: FixedAsset.tracked_year,
+    field: "tracked_year",
+  },
+  {
+    label: FixedAsset.purchase_date,
+    field: "purchase_date",
+  },
+  {
+    label: FixedAsset.production_time,
+    field: "production_time",
+  },
+];

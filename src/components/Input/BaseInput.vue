@@ -50,7 +50,7 @@ export default {
   position: relative;
 }
 .search-icon {
-  background: url("../assets/qlts-icon.svg") no-repeat -243px -23px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -243px -23px;
   width: 18px;
   height: 18px;
   left: 15px;

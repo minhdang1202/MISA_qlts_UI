@@ -4,7 +4,7 @@
   </button>
 </template>
 <script>
-import { toggleModal } from "../state";
+import { toggleModal } from "../../js/state";
 import { Enums } from "@/assets/Constants";
 export default {
   setup() {

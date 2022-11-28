@@ -46,7 +46,7 @@ export default {
   align-items: center;
 }
 .icon_success {
-  background: url("../assets/qlts-icon.svg") no-repeat -71px -512px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -71px -512px;
   width: 11px;
   height: 8px;
   scale: 1.5;

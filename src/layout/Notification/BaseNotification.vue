@@ -26,7 +26,7 @@
   </div>
 </template>
 <script>
-import { openToast } from "../state";
+import { openToast } from "../../js/state";
 import { Enums, TypeConfirm } from "@/assets/Constants";
 
 export default {

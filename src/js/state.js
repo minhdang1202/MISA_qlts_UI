@@ -1,4 +1,5 @@
 import { ref } from "vue";
+import { Enums } from "../assets/Constants";
 export const is_expanded = ref(false);
 
 /**
@@ -40,4 +41,19 @@ export const openToast = () => {
 export const isConfirm = ref(false);
 export const toggleConfirm = () => {
   isConfirm.value = !isConfirm.value;
+};
+
+export const showError = (error) => {
+  if (error?.response) {
+    switch (error?.response?.status) {
+      case Enums.StatusCode.BadRequest:
+        return error.response.data.MoreInfo;
+
+      case Enums.StatusCode.InternalServerError:
+        return error.response.data.UserMsg;
+
+      case Enums.StatusCode.NotFound:
+        return error.response.data.UserMsg;
+    }
+  }
 };

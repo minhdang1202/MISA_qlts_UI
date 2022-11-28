@@ -63,8 +63,8 @@
   </div>
 </template>
 <script>
-import { is_expanded, toggleMenu } from "../state";
-import { SIDEBARS } from "../data";
+import { is_expanded, toggleMenu } from "../../js/state";
+import { SIDEBARS } from "../../js/data";
 import { useRoute } from "vue-router";
 
 export default {
@@ -121,7 +121,7 @@ export default {
   padding: 0px;
 }
 .logo > div {
-  background-image: url("../assets/qlts-icon.svg");
+  background-image: url("../../assets/qlts-icon.svg");
   background-repeat: no-repeat;
   width: 36px;
   height: 36px;
@@ -167,7 +167,7 @@ export default {
   justify-content: space-between;
 }
 .nav-item-right {
-  background: url("../assets/qlts-icon.svg") no-repeat -158px -293px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -158px -293px;
   width: 11px;
   height: 7px;
   margin-right: 13px;
@@ -185,72 +185,72 @@ export default {
 }
 
 .overview {
-  background: url("../assets/qlts-icon.svg") no-repeat -21px -153px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -21px -153px;
   width: 22px;
   height: 22px;
 }
 .overview-active {
-  background: url("../assets/qlts-icon.svg") no-repeat -22px -198px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -22px -198px;
   width: 20px;
   height: 21px;
 }
 .asset {
-  background: url("../assets/qlts-icon.svg") no-repeat -65px -153px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -65px -153px;
   width: 22px;
   height: 23px;
 }
 .asset-active {
-  background: url("../assets/qlts-icon.svg") no-repeat -65px -197px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -65px -197px;
   width: 22px;
   height: 23px;
 }
 .ht-db {
-  background: url("../assets/qlts-icon.svg") no-repeat -110px -153px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -110px -153px;
   width: 21px;
   height: 23px;
 }
 .ht-db-active {
-  background: url("../assets/qlts-icon.svg") no-repeat -110px -197px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -110px -197px;
   width: 21px;
   height: 22px;
 }
 .tool {
-  background: url("../assets/qlts-icon.svg") no-repeat -153px -153px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -153px -153px;
   width: 22px;
   height: 22px;
 }
 .tool-active {
-  background: url("../assets/qlts-icon.svg") no-repeat -153px -197px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -153px -197px;
   width: 22px;
   height: 22px;
 }
 .category {
-  background: url("../assets/qlts-icon.svg") no-repeat -197px -155px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -197px -155px;
   width: 22px;
   height: 18px;
 }
 .category-active {
-  background: url("../assets/qlts-icon.svg") no-repeat -198px -200px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -198px -200px;
   width: 20px;
   height: 17px;
 }
 .search {
-  background: url("../assets/qlts-icon.svg") no-repeat -241px -153px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -241px -153px;
   width: 22px;
   height: 22px;
 }
 .search-active {
-  background: url("../assets/qlts-icon.svg") no-repeat -240px -196px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -240px -196px;
   width: 23px;
   height: 23px;
 }
 .report {
-  background: url("../assets/qlts-icon.svg") no-repeat -329px -153px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -329px -153px;
   width: 22px;
   height: 22px;
 }
 .report-active {
-  background: url("../assets/qlts-icon.svg") no-repeat -330px -198px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -330px -198px;
   width: 20px;
   height: 20px;
 }
@@ -274,7 +274,7 @@ export default {
 }
 
 .back-icon {
-  background: url("../assets/qlts-icon.svg") no-repeat -285px -417px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -285px -417px;
   width: 22px;
   height: 22px;
   border: none;
@@ -283,7 +283,7 @@ export default {
   opacity: 0.8;
 }
 .show-icon {
-  background: url("../assets/qlts-icon.svg") no-repeat -329px -417px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -329px -417px;
   width: 22px;
   height: 22px;
   border: none;

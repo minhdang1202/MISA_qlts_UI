@@ -1,5 +1,4 @@
 <template lang="">
-  <Combobox />
   {{
     vueNumberFormat(275, {
       prefix: "0",
@@ -13,12 +12,9 @@
   <button @click="openToast"></button>
 </template>
 <script>
-import BaseCombobox from "../components/BaseCombobox.vue";
 import { ref } from "vue";
 export default {
-  components: {
-    Combobox: BaseCombobox,
-  },
+  components: {},
   methods: {
     openToast() {
       this.showToast = !this.showToast;

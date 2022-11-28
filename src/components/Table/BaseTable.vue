@@ -314,13 +314,13 @@
   </div>
 </template>
 <script>
-import { ASSETS } from "../data";
-import BaseModal from "../layout/BaseModal.vue";
+import { ASSETS } from "../../js/data";
+import BaseModal from "../../layout/Modal/BaseModal.vue";
 import { Enums } from "@/assets/Constants";
 import { TypeConfirm } from "@/assets/Constants";
 import axios from "axios";
-import LoadingScreen from "./LoadingScreen.vue";
-import { openToast } from "../state";
+import LoadingScreen from "../../layout/Loading/LoadingScreen.vue";
+import { openToast } from "../../js/state";
 
 export default {
   data() {
@@ -603,7 +603,7 @@ export default {
 .no-data-icon {
   width: 100%;
   height: 100%;
-  background-image: url("../assets/img-EmptyData-L.svg");
+  background-image: url("../../assets/img-EmptyData-L.svg");
   background-repeat: no-repeat;
   background-position: center center;
 }
@@ -688,7 +688,7 @@ export default {
 }
 
 .arrow {
-  background: url("../assets/qlts-icon.svg") no-repeat -72px -338px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -72px -338px;
   width: 7px;
   height: 5px;
 }
@@ -852,12 +852,12 @@ p {
   font-size: 11px;
 }
 .m-btn-prev {
-  background: url("../assets/qlts-icon.svg") no-repeat -206px -248px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -206px -248px;
   width: 5px;
   height: 8px;
 }
 .m-btn-next {
-  background: url("../assets/qlts-icon.svg") no-repeat -250px -248px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -250px -248px;
   width: 5px;
   height: 8px;
 }
@@ -888,13 +888,13 @@ p {
   display: none;
 }
 .btn-edit {
-  background: url("../assets/qlts-icon.svg") no-repeat -156px -68px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -156px -68px;
   width: 16px;
   height: 16px;
   margin-right: 8px;
 }
 .btn-other {
-  background: url("../assets/qlts-icon.svg") no-repeat -244px -112px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -244px -112px;
   width: 16px;
   height: 16px;
   margin-left: 8px;

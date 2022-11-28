@@ -5,8 +5,8 @@
   </div>
 </template>
 <script>
-import BaseContent from "../layout/BaseContent.vue";
-import BaseHeader from "../layout/BaseHeader.vue";
+import BaseContent from "../layout/AssetPage/BaseContent.vue";
+import BaseHeader from "../layout/AssetPage/BaseHeader.vue";
 
 export default {
   data() {

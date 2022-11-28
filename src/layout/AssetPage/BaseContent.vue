@@ -14,34 +14,41 @@
       <div class="enter_text">
         <Input />
 
-        <Combobox
-          :options="categories"
-          :option_default="Enums.txtAssetType"
-          hasCheck
-          lineHeight="15px"
+        <BaseDropdown
+          fieldCode="fixed_asset_category_code"
+          fieldName="fixed_asset_category_name"
+          :placeholderText="Enums.txtAssetType"
+          v-model="asset_category_filter"
+          class="mr-20 mt-20"
           :style="{ width: '219px' }"
           hasFilterIcon
-          id="select_asset"
-        />
-        <Combobox
-          :options="departments"
-          :option_default="Enums.txtDepartment"
-          hasCheck
-          lineHeight="15px"
+          inputMaxLenght="20"
+        ></BaseDropdown>
+        <BaseDropdown
           :style="{ width: '219px' }"
+          fieldCode="department_code"
+          fieldName="department_name"
+          :placeholderText="Enums.txtDepartment"
+          v-model="department_filter"
+          class="mr-20 mt-20"
           hasFilterIcon
-          id="select_department"
-        />
+          inputMaxLenght="20"
+        ></BaseDropdown>
       </div>
       <div class="enter_choice">
         <AddButton />
-        <button
+        <vue-excel-xlsx
           class="btn btn_box"
           :title="Enums.txtExportFile"
           :disabled="listSelected.length === 0"
+          :data="listSelected"
+          :columns="dataColumns"
+          :file-name="'filename'"
+          :file-type="'xlsx'"
+          :sheet-name="'TaiSan'"
         >
           <div class="btn btn_excel"></div>
-        </button>
+        </vue-excel-xlsx>
         <button
           :disabled="listSelected.length === 0"
           class="btn_box"
@@ -56,16 +63,15 @@
   </div>
 </template>
 <script>
-import { Enums, TypeConfirm } from "@/assets/Constants";
-import BaseTable from "../components/BaseTable.vue";
-import BaseInput from "../components/BaseInput.vue";
-import AddButton from "../components/AddButton.vue";
-import BaseCombobox from "../components/BaseCombobox.vue";
-import BaseToast from "../components/BaseToast.vue";
-import { showToast, openToast } from "../state";
-import BaseConfirm from "../layout/BaseConfirm.vue";
+import { Enums, TypeConfirm, dataColumns } from "@/assets/Constants";
+import BaseTable from "../../components/Table/BaseTable.vue";
+import BaseInput from "../../components/Input/BaseInput.vue";
+import AddButton from "../../components/Button/AddButton.vue";
+import BaseDropdown from "../../components/Dropdown/BaseDropdown.vue";
+import BaseToast from "../ToastMessage/BaseToast.vue";
+import { showToast, openToast } from "../../js/state";
+import BaseConfirm from "../Confirm/BaseConfirm.vue";
 import axios from "axios";
-
 export default {
   name: "my-content",
   data() {
@@ -76,13 +82,15 @@ export default {
       typeDelete: 0,
       isShowConfirm: false,
       deleteSuccess: false,
+      asset_category_filter: "",
+      department_filter: "",
     };
   },
   components: {
     Table: BaseTable,
     Input: BaseInput,
     AddButton: AddButton,
-    Combobox: BaseCombobox,
+    BaseDropdown,
     Toast: BaseToast,
     Confirm: BaseConfirm,
   },
@@ -117,10 +125,47 @@ export default {
       this.isShowConfirm = !this.isShowConfirm;
     },
   },
-  setup() {
-    return { showToast, openToast, Enums };
+
+  watch: {
+    /**
+     * Thay đổi phòng ban cần lọc
+     * Author : Vu Minh Dang (25/11/2022)
+     */
+    department_filter: function () {
+      var department = this.departments?.find(
+        (department) => this.department_filter == department?.department_code
+      );
+      if (department) {
+        this.emitter.emit("changeDepartment", department.department_id);
+      }
+      if (this.department_filter === "") {
+        this.emitter.emit("changeDepartment", "");
+      }
+    },
+
+    /**
+     * Thay đổi mã loại tài sản cần lọc
+     * Author : Vu Minh Dang(26/11/2022)
+     */
+    asset_category_filter: function () {
+      var category = this.categories.find(
+        (category) =>
+          this.asset_category_filter == category?.fixed_asset_category_code
+      );
+
+      if (category) {
+        this.emitter.emit("changeCategory", category.fixed_asset_category_id);
+      }
+      if (this.asset_category_filter === "") {
+        this.emitter.emit("changeCategory", "");
+      }
+    },
   },
-  mounted() {
+
+  setup() {
+    return { showToast, openToast, Enums, dataColumns };
+  },
+  created() {
     //Lấy danh sách phòng ban
     axios
       .get("http://localhost:5137/api/Department")
@@ -190,7 +235,7 @@ export default {
   border-color: #1aa4c8;
 }
 .text {
-  background: url("../assets/qlts-icon.svg") no-repeat -243px -69px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -243px -69px;
   width: 17px;
   height: 16px;
   margin: 0 10px;
@@ -235,17 +280,17 @@ export default {
   cursor: no-drop;
 }
 .btn_box:disabled > .btn_delete {
-  background: url("../assets/qlts-icon.svg") no-repeat -419px -111px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -419px -111px;
   width: 18px;
   height: 18px;
 }
 .btn_excel {
-  background: url("../assets/qlts-icon.svg") no-repeat -287px -111px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -287px -111px;
   width: 18px;
   height: 17px;
 }
 .btn_delete {
-  background: url("../assets/qlts-icon.svg") no-repeat -419px -111px;
+  background: url("../../assets/qlts-icon.svg") no-repeat -419px -111px;
   width: 18px;
   height: 18px;
 }
